@@ -29,7 +29,12 @@ namespace ioo_ros2
 
     Eigen::Matrix<double, 3, 2> h()
     {
-        return Eigen::Matrix<double, 3, 2>::Zero();
+        Eigen::Matrix<double, 3, 2> h_;
+        h_.setZero();
+        h_(0, 0) = 1.0;
+        h_(1, 1) = 1.0;
+        
+        return h_;
     }
 
     Eigen::Matrix3d jacob(const Eigen::Vector3d input_matrix, const Eigen::Vector3d estimation)
@@ -39,6 +44,21 @@ namespace ioo_ros2
         auto cos_pitch = cos(estimation.y());
         auto sin_pitch = sin(estimation.y());
 
-        auto m11 = 1.0 + input_matrix.y();
+        auto m_11 = 1.0 + input_matrix.y() * ((cos_roll*sin_pitch)/cos_pitch) - input_matrix.z() * ((sin_roll*sin_pitch)/cos_pitch);
+        auto m_12 = input_matrix.y()*(sin_roll/(cos_pitch*cos_pitch))+input_matrix.z()*((cos_roll/(cos_pitch*cos_pitch)));
+        auto m_21 = -1.0*input_matrix.y()*sin_roll - input_matrix.z()*cos_roll;
+        auto m_31 = input_matrix.y()*(cos_roll/cos_pitch) - input_matrix.z()*(sin_roll/cos_pitch);
+        auto m_32 = input_matrix.y()*((sin_roll*sin_pitch)/(cos_pitch*cos_pitch))+input_matrix.z()*((cos_roll*sin_pitch)/(cos_pitch*cos_pitch));
+
+        Eigen::Matrix3d mat;
+        mat.setZero();
+        mat(0, 0) = m_11;
+        mat(0, 1) = m_12;
+        mat(1, 0) = m_21;
+        mat(1, 1) = 1.0;
+        mat(2, 0) = m_31;
+        mat(2, 1) = m_32;
+
+        return mat;
     }
 }
