@@ -61,4 +61,46 @@ namespace ioo_ros2
 
         return mat;
     }
+
+    Eigen::Vector3d predict_x(const Eigen::Vector3d input_matrix, const Eigen::Vector3d estimation)
+    {
+        auto cos_roll = cos(estimation.x());
+        auto sin_roll = sin(estimation.x());
+        auto cos_pitch = cos(estimation.y());
+        auto sin_pitch = sin(estimation.y());
+
+        Eigen::Vector3d est;
+        est(0) = estimation.x() + input_matrix.x() + input_matrix.y()*((sin_roll*sin_pitch)/cos_pitch)+input_matrix.z()*((cos_roll*sin_pitch)/cos_pitch);
+        est(1) = estimation.y() + input_matrix.y() * cos_roll - input_matrix.z()*sin_roll;
+        est(2) = estimation.z() + input_matrix.z() + input_matrix.y()*(sin_roll/cos_pitch) + input_matrix.z()*(cos_roll/cos_pitch);
+
+        return est;
+    }
+
+    Eigen::Matrix3d predict_cov(const Eigen::Matrix3d jacob, const Eigen::Matrix3d cov, const Eigen::Matrix3d est_noise)
+    {
+        auto t_jacob = jacob.transpose();
+        auto jacob_cov = jacob * cov;
+
+        Eigen::Matrix3d new_cov;
+        new_cov.setZero();
+
+        auto multiplied = jacob_cov * t_jacob;
+
+        new_cov = multiplied + est_noise;
+
+        return new_cov;
+    }
+
+    Eigen::Vector2d update_residual(const Eigen::Vector2d obs, const Eigen::Vector3d est)
+    {
+        Eigen::Vector2d result;
+        auto h_ = h();
+        auto h_est = h_ * est;
+
+        result(0) = obs.x() - h_est.x();
+        result(1) = obs.y() - h_est.y();
+
+        return result;
+    }
 }
