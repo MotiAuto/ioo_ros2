@@ -35,6 +35,16 @@ namespace ioo_ros2
         return estimation_;
     }
 
+    Eigen::Vector3d getEigenVec3(double x, double y, double z)
+    {
+        Eigen::Vector3d vec;
+        vec(0) = x;
+        vec(1) = y;
+        vec(2) = z;
+
+        return vec;
+    }
+
     Eigen::Vector3d getInputMatrix(double angular_x, double angular_y, double angular_z)
     {
         return Eigen::Vector3d(

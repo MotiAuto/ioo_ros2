@@ -9,6 +9,8 @@
 using namespace std::chrono_literals;
 using std::placeholders::_1;
 
+#include "posture.hpp"
+
 namespace ioo_ros2
 {
     class ImuOnlyOdometryROS2 : public rclcpp::Node
@@ -25,6 +27,8 @@ namespace ioo_ros2
         rclcpp::TimerBase::SharedPtr timer_;
 
         sensor_msgs::msg::Imu::SharedPtr get_msg;
+
+        std::shared_ptr<PostureEstimater> posture_estimater;
     };
 }
 
