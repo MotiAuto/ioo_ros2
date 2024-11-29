@@ -4,6 +4,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 #include <nav_msgs/msg/odometry.hpp>
+#include <tf2/LinearMath/Quaternion.h>
 
 #include <chrono>
 using namespace std::chrono_literals;

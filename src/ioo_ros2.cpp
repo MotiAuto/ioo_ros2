@@ -28,6 +28,18 @@ namespace ioo_ros2
         auto angular_vel = getEigenVec3(get_msg->angular_velocity.x, get_msg->angular_velocity.y, get_msg->angular_velocity.z);
         
         auto estimated_posture = posture_estimater->estimate(angular_vel, linear_accel);
+
+        tf2::Quaternion q;
+        q.setRPY(estimated_posture.x(), estimated_posture.y(), estimated_posture.z());
+        auto odom_msg = nav_msgs::msg::Odometry();
+        odom_msg.header.frame_id = "map";
+        odom_msg.child_frame_id = "odom";
+        odom_msg.pose.pose.orientation.w = q.w();
+        odom_msg.pose.pose.orientation.x = q.x();
+        odom_msg.pose.pose.orientation.y = q.y();
+        odom_msg.pose.pose.orientation.z = q.z();
+
+        publisher_->publish(odom_msg);
     }
 }
 
