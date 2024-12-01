@@ -28,6 +28,7 @@ namespace ioo_ros2
         rclcpp::TimerBase::SharedPtr timer_;
 
         sensor_msgs::msg::Imu::SharedPtr get_msg;
+        bool get_msg_flag;
 
         std::shared_ptr<PostureEstimater> posture_estimater;
     };
