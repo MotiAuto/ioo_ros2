@@ -106,13 +106,13 @@ namespace ioo_ros2
 
     Eigen::Matrix3d predictCov(const Eigen::Matrix3d jacob, const Eigen::Matrix3d cov, const Eigen::Matrix3d est_noise)
     {
-        auto t_jacob = jacob.transpose();
-        auto jacob_cov = jacob * cov;
+        Eigen::Matrix3d t_jacob = jacob.transpose();
+        Eigen::Matrix3d jacob_cov = jacob * cov;
 
         Eigen::Matrix3d new_cov;
         new_cov.setZero();
 
-        auto multiplied = jacob_cov * t_jacob;
+        Eigen::Matrix3d multiplied = jacob_cov * t_jacob;
 
         new_cov = multiplied + est_noise;
 
@@ -122,8 +122,8 @@ namespace ioo_ros2
     Eigen::Vector2d updateResidual(const Eigen::Vector2d obs, const Eigen::Vector3d est)
     {
         Eigen::Vector2d result;
-        auto h_ = h();
-        auto h_est = h_ * est;
+        Eigen::Matrix<double, 2, 3> h_ = h().transpose();
+        Eigen::Vector2d h_est = h_ * est;
 
         result(0) = obs.x() - h_est.x();
         result(1) = obs.y() - h_est.y();
@@ -133,25 +133,27 @@ namespace ioo_ros2
 
     Eigen::Matrix2d updateS(const Eigen::Matrix3d cov_, const Eigen::Matrix2d obs_noise)
     {
-        auto convert_cov_ = h().transpose() * cov_ * h();
+        Eigen::Matrix<double, 2, 3> h_ = h().transpose();
+        Eigen::Matrix<double, 2, 3> h_cov_ = h_ * cov_;
+        Eigen::Matrix2d convert_cov_ = h_cov_ * h();
 
         return obs_noise + convert_cov_;
     }
 
     Eigen::Matrix<double, 3, 2> updateKalmanGain(const Eigen::Matrix2d s, const Eigen::Matrix3d cov)
     {
-        auto h_ = h().transpose();
+        auto h_ = h();
 
-        auto inverse_s = s.inverse();
+        Eigen::Matrix2d inverse_s = s.inverse();
 
-        auto cov_and_h = cov * h_;
+        Eigen::Matrix<double, 3, 2> cov_and_h = cov * h_;
 
         return cov_and_h * inverse_s;
     }
 
     Eigen::Vector3d updateX(const Eigen::Vector3d est, const Eigen::Matrix<double, 3, 2> kalman_gain_, const Eigen::Vector2d residual)
     {
-        auto kalman_res = kalman_gain_ * residual;
+        Eigen::Vector3d kalman_res = kalman_gain_ * residual;
 
         Eigen::Vector3d result;
         result.setZero();
@@ -159,6 +161,8 @@ namespace ioo_ros2
         result(0) = est.x() + kalman_res.x();
         result(1) = est.y() + kalman_res.y();
         result(2) = est.z() + kalman_res.z();
+
+        return result;
     }
 
     Eigen::Matrix3d updateCov(const Eigen::Matrix<double, 3, 2> kalman_gain, const Eigen::Matrix3d cov)
@@ -166,11 +170,11 @@ namespace ioo_ros2
         Eigen::Matrix3d i;
         i.setIdentity();
 
-        auto h_ = h().transpose();
+        Eigen::Matrix<double, 2, 3> h_ = h().transpose();
 
-        auto kalman_h = kalman_gain * h_;
+        Eigen::Matrix3d kalman_h = kalman_gain * h_;
 
-        auto i_k_h = i - kalman_h;
+        Eigen::Matrix3d i_k_h = i - kalman_h;
 
         return i_k_h * cov;
     }
