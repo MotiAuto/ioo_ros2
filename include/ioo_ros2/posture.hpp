@@ -2,6 +2,7 @@
 #define POSTURE_HPP_
 
 #include <Eigen/Core>
+#include <Eigen/Dense>
 
 namespace ioo_ros2
 {
