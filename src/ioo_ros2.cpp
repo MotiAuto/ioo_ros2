@@ -28,13 +28,14 @@ namespace ioo_ros2
     {
         if(get_msg_flag)
         {
+            auto coef = M_PI / 180.0;
             auto linear_accel = getEigenVec3(get_msg->linear_acceleration.x, get_msg->linear_acceleration.y, get_msg->linear_acceleration.z);
-            auto angular_vel = getEigenVec3(get_msg->angular_velocity.x, get_msg->angular_velocity.y, get_msg->angular_velocity.z);
+            auto angular_vel = getEigenVec3(get_msg->angular_velocity.x*coef, get_msg->angular_velocity.y*coef, get_msg->angular_velocity.z*coef);
             
             auto estimated_posture = posture_estimater->estimate(angular_vel, linear_accel);
 
             tf2::Quaternion q;
-            q.setRPY(estimated_posture.x(), estimated_posture.y(), estimated_posture.z());
+            q.setRPY(estimated_posture.x(), estimated_posture.y(), estimated_posture.z()/2.0);
             auto odom_msg = nav_msgs::msg::Odometry();
             odom_msg.header.frame_id = "map";
             odom_msg.child_frame_id = "odom";
