@@ -10,6 +10,8 @@ namespace ioo_ros2
             qos_settings,
             std::bind(&ImuOnlyOdometryROS2::topic_callback, this, _1));
 
+        rpy_publisher_ = this->create_publisher<geometry_msgs::msg::Vector3>("/posture", 0);
+
         publisher_ = this->create_publisher<nav_msgs::msg::Odometry>("/odom", 0);
 
         timer_ = this->create_wall_timer(1ms, std::bind(&ImuOnlyOdometryROS2::timer_callback, this));
@@ -33,6 +35,10 @@ namespace ioo_ros2
             auto angular_vel = getEigenVec3(get_msg->angular_velocity.x*coef, get_msg->angular_velocity.y*coef, get_msg->angular_velocity.z*coef);
             
             auto estimated_posture = posture_estimater->estimate(angular_vel, linear_accel);
+            auto rpy_msg = geometry_msgs::msg::Vector3();
+            rpy_msg.x = estimated_posture.x();
+            rpy_msg.y = estimated_posture.y();
+            rpy_msg.z = estimated_posture.z() / 2.0;
 
             tf2::Quaternion q;
             q.setRPY(estimated_posture.x(), estimated_posture.y(), estimated_posture.z()/2.0);
@@ -45,6 +51,7 @@ namespace ioo_ros2
             odom_msg.pose.pose.orientation.z = q.z();
 
             publisher_->publish(odom_msg);
+            rpy_publisher_->publish(rpy_msg);
         }
         else
         {

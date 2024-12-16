@@ -4,6 +4,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 #include <nav_msgs/msg/odometry.hpp>
+#include <geometry_msgs/msg/vector3.hpp>
 #include <tf2/LinearMath/Quaternion.h>
 
 #include <chrono>
@@ -25,6 +26,7 @@ namespace ioo_ros2
         private:
         rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr subscriber_;
         rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr publisher_;
+        rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr rpy_publisher_;
         rclcpp::TimerBase::SharedPtr timer_;
 
         sensor_msgs::msg::Imu::SharedPtr get_msg;
