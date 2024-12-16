@@ -12,7 +12,7 @@ namespace ioo_ros2
 
         rpy_publisher_ = this->create_publisher<geometry_msgs::msg::Vector3>("/posture", 0);
 
-        publisher_ = this->create_publisher<nav_msgs::msg::Odometry>("/odom", 0);
+        publisher_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/pose_stamped", 0);
 
         timer_ = this->create_wall_timer(1ms, std::bind(&ImuOnlyOdometryROS2::timer_callback, this));
 
@@ -42,13 +42,12 @@ namespace ioo_ros2
 
             tf2::Quaternion q;
             q.setRPY(estimated_posture.x(), estimated_posture.y(), estimated_posture.z()/2.0);
-            auto odom_msg = nav_msgs::msg::Odometry();
+            auto odom_msg = geometry_msgs::msg::PoseStamped();
             odom_msg.header.frame_id = "map";
-            odom_msg.child_frame_id = "odom";
-            odom_msg.pose.pose.orientation.w = q.w();
-            odom_msg.pose.pose.orientation.x = q.x();
-            odom_msg.pose.pose.orientation.y = q.y();
-            odom_msg.pose.pose.orientation.z = q.z();
+            odom_msg.pose.orientation.w = q.w();
+            odom_msg.pose.orientation.x = q.x();
+            odom_msg.pose.orientation.y = q.y();
+            odom_msg.pose.orientation.z = q.z();
 
             publisher_->publish(odom_msg);
             rpy_publisher_->publish(rpy_msg);
