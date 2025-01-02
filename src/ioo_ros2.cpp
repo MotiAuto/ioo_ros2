@@ -18,6 +18,16 @@ namespace ioo_ros2
 
         posture_estimater = std::make_shared<PostureEstimater>();
         get_msg_flag = false;
+
+        this->declare_parameter("enable_pose_estimate", true);
+        this->get_parameter("enable_pose_estimate", enable_pose_estimate);
+
+        this->declare_parameter("frame_id", "map");
+        this->get_parameter("frame_id", frame_id);
+
+        odom_msg.header.frame_id = frame_id;
+
+        RCLCPP_INFO(this->get_logger(), "Start IOO_ROS2");
     }
 
     void ImuOnlyOdometryROS2::topic_callback(const sensor_msgs::msg::Imu::SharedPtr msg)
@@ -42,12 +52,17 @@ namespace ioo_ros2
 
             tf2::Quaternion q;
             q.setRPY(estimated_posture.x(), estimated_posture.y(), estimated_posture.z()/2.0);
-            auto odom_msg = geometry_msgs::msg::PoseStamped();
-            odom_msg.header.frame_id = "map";
             odom_msg.pose.orientation.w = q.w();
             odom_msg.pose.orientation.x = q.x();
             odom_msg.pose.orientation.y = q.y();
             odom_msg.pose.orientation.z = q.z();
+
+            if(enable_pose_estimate)
+            {
+                const auto calc_pose = CalcPose(linear_accel, q, 0.001);
+                odom_msg.pose.position.x += calc_pose.x();
+                odom_msg.pose.position.y += calc_pose.y();
+            }
 
             publisher_->publish(odom_msg);
             rpy_publisher_->publish(rpy_msg);
